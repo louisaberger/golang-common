@@ -1,7 +1,7 @@
 package util
 
 import (
-	"github.com/go-yaml/yaml"
+	"gopkg.in/yaml.v1"
 
 	"bytes"
 	"encoding/json"
