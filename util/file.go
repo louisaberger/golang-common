@@ -72,6 +72,21 @@ func FileExists(path string) (bool, error) {
 	return true, nil
 }
 
+func RemoveIfExists(path string) error {
+	exists, err := FileExists(path)
+	if err != nil {
+		return err
+	}
+
+	if exists {
+		if err = os.Remove(path); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func IsDir(path string) (bool, error) {
 	fileinfo, err := os.Stat(path)
 	if err != nil {
@@ -81,4 +96,13 @@ func IsDir(path string) (bool, error) {
 		return false, err
 	}
 	return fileinfo.IsDir(), nil
+}
+
+func IsSymlink(path string) (bool, error) {
+	fileInfo, err := os.Lstat(path)
+	if err != nil {
+		return false, err
+	}
+
+	return fileInfo.Mode()&os.ModeSymlink == os.ModeSymlink, nil
 }
