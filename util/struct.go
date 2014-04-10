@@ -3,27 +3,27 @@ package util
 import (
 	"fmt"
 	"reflect"
-	"strings"
 )
 
-// @param obj should be the value of a ptr to a struct
-// @return reflect.Value of the 'key' field of 'obj'
-func StructIndex(key string, obj reflect.Value) reflect.Value {
+func StructIndex(key string, strc reflect.Value) (val reflect.Value, exists bool) {
 
-	if !IsPtrToStruct(obj) {
-		panic(fmt.Sprintf("Cannot call StructIndex on a non-ptr to struct %#v of kind %#v", obj, obj.Kind().String()))
+	if !IsStruct(strc) {
+		panic(fmt.Sprintf("Cannot call StructIndex on a non-struct %#v of kind %#v", strc, strc.Kind().String()))
 	}
 
-	pointingTo := obj.Elem()
-	if !fieldExists(key, pointingTo) {
-		return reflect.ValueOf(nil)
+	if !StructFieldExists(key, strc) {
+		return
 	}
-	// get the actual field value
-	fieldValue := pointingTo.FieldByName(strings.Title(key))
-	return fieldValue
+
+	fieldValue := strc.FieldByName(key)
+	return fieldValue, true
 }
 
-func fieldExists(key string, v reflect.Value) bool {
-	_, ok := v.Type().FieldByName(strings.Title(key))
+func StructFieldExists(key string, strc reflect.Value) bool {
+	if !IsStruct(strc) {
+		panic(fmt.Sprintf("Cannot call StructFieldExists on a non-struct %#v of kind %#v", strc, strc.Kind().String()))
+	}
+
+	_, ok := strc.Type().FieldByName(key)
 	return ok
 }

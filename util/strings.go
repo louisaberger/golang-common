@@ -23,13 +23,24 @@ func RemoveSuffix(s, suffix string) string {
 	return s
 }
 
-// @return s with its first letter in lower case.
-func Untitle(s string) string {
+// @return s with its first char in lower case.
+func FirstCharLower(s string) string {
 	if s == "" {
 		return s
 	}
 	a := []rune(s)
 	a[0] = unicode.ToLower(a[0])
+	return string(a)
+}
+
+// @return s with its first char in upper case.
+func FirstCharUpper(s string) string {
+	if s == "" {
+		return s
+	}
+
+	a := []rune(s)
+	a[0] = unicode.ToUpper(a[0])
 	return string(a)
 }
 
