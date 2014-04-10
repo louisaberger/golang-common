@@ -80,7 +80,7 @@ func TestNonRetriableFailure(t *testing.T) {
 		retryFail, err := Retry(failingFuncNoRetry, TEST_RETRIES, TEST_SLEEP)
 
 		Convey("calling it with Retry should return an error", func() {
-			So(err, ShouldBeNil)
+			So(err.Error(), ShouldEqual, "something went wrong!")
 		})
 		Convey("the 'retried till failure' flag should be false", func() {
 			So(retryFail, ShouldBeFalse)

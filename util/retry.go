@@ -20,6 +20,7 @@ func (retriable RetriableError) Error() string {
 //sleeping the specified amount of time between each call.
 //The function can return an error to abort the retrying, or return
 //RetriableError to allow the function to be called again.
+//Returns true if it uses up all its retry attempts without running successfully
 func Retry(attemptFunc RetriableFunc, maxTries int, sleep time.Duration) (bool, error) {
 	triesLeft := maxTries
 	for {
@@ -41,7 +42,7 @@ func Retry(attemptFunc RetriableFunc, maxTries int, sleep time.Duration) (bool, 
 			}
 		} else {
 			//function returned err but it can't be retried - fail immediately
-			return false, retriableErr.Failure
+			return false, err
 		}
 	}
 }
