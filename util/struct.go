@@ -20,14 +20,7 @@ func StructIndex(key string, v reflect.Value) (val reflect.Value, exists bool) {
 		return
 	}
 
-	switch {
-	case IsPtrToStruct(v):
-		return v.Elem().FieldByName(key), true
-	case IsStruct(v):
-		return v.FieldByName(key), true
-	default:
-		return
-	}
+	return structFromPtrOrStruct(v).FieldByName(key), true
 }
 
 func StructFieldExists(key string, v reflect.Value) bool {
@@ -35,13 +28,7 @@ func StructFieldExists(key string, v reflect.Value) bool {
 		panic(fmt.Sprintf("Cannot call StructFieldExists on a non-struct %#v of kind %#v", v, v.Kind().String()))
 	}
 
-	var ok bool
-	switch {
-	case IsPtrToStruct(v):
-		_, ok = v.Elem().Type().FieldByName(key)
-	case IsStruct(v):
-		_, ok = v.Type().FieldByName(key)
-	}
+	_, ok := structFromPtrOrStruct(v).Type().FieldByName(key)
 	return ok
 }
 
@@ -70,6 +57,7 @@ func NestedStructIndex(key string, v reflect.Value) (val reflect.Value, exists b
 			return
 		}
 
+		// nestedObj is a nil ptr to struct
 		if TypeIsPtrToStruct(structFieldType(keyBeforeDot, obj)) && !nestedObj.Elem().IsValid() {
 			return
 		}
@@ -84,16 +72,24 @@ func structFieldType(key string, v reflect.Value) (t reflect.Type) {
 		panic(fmt.Sprintf("Cannot call structFieldType on a non-struct %#v of kind %#v", v, v.Kind().String()))
 	}
 
-	var structField reflect.StructField
-	var ok bool
-	switch {
-	case IsPtrToStruct(v):
-		structField, ok = v.Elem().Type().FieldByName(key)
-	case IsStruct(v):
-		structField, ok = v.Type().FieldByName(key)
-	}
+	structField, ok := structFromPtrOrStruct(v).Type().FieldByName(key)
 	if !ok {
 		panic(fmt.Sprintf("Key=%v is not a field in struct=%v", key, v))
 	}
 	return structField.Type
+}
+
+func structFromPtrOrStruct(v reflect.Value) (strct reflect.Value) {
+	if !IsPtrToStruct(v) && !IsStruct(v) {
+		panic(fmt.Sprintf("Cannot call structFromPtrOrStruct on a non-struct %#v of kind %#v", v, v.Kind().String()))
+	}
+
+	switch {
+	case IsPtrToStruct(v):
+		return v.Elem()
+	case IsStruct(v):
+		return v
+	}
+
+	return
 }
