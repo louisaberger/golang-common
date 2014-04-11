@@ -20,7 +20,7 @@ func ReadJsonFromFile(filename string, result interface{}) error {
 	return nil
 }
 
-// Writes mapData to filename as "pretty" JSON.
+// Writes data to filename as "pretty" JSON.
 func WriteJsonToFile(filename string, data interface{}, perm os.FileMode) error {
 	rawData, err := json.Marshal(data)
 	if err != nil {
@@ -67,7 +67,7 @@ func FileExists(path string) (bool, error) {
 		if os.IsNotExist(err) {
 			return false, nil
 		}
-		return true, err
+		return false, err
 	}
 	return true, nil
 }
