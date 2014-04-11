@@ -6,6 +6,58 @@ import (
 	"strings"
 )
 
+func SetStructIndex(key string, x reflect.Value, v reflect.Value) {
+	if !IsPtrStructOrStruct(v) {
+		panic(fmt.Sprintf("Cannot call SetStructIndex on a non-struct %#v of kind %#v", v, v.Kind().String()))
+	}
+
+	if FirstCharUpper(key) != key {
+		panic(fmt.Sprintf("Cannot set a non-exported field=%v in struct.", key))
+	}
+
+	if !StructFieldExists(key, v) {
+		panic(fmt.Sprintf("Cannot set non-existent field=%v in struct=%v.", key, v))
+	}
+
+	StructIndirect(v).FieldByName(key).Set(x)
+}
+
+func SetNestedStructIndex(key string, x reflect.Value, v reflect.Value) {
+	obj := v
+
+	// sanitize the key input
+	key = strings.TrimSuffix(key, ".")
+
+	for strings.Index(key, ".") != -1 {
+		if !IsPtrStructOrStruct(obj) {
+			panic(fmt.Sprintf("Cannot call SetNestedStructIndex on a non-struct %#v of kind %#v", obj, obj.Kind().String()))
+		}
+
+		dotIndex := strings.Index(key, ".")
+		keyBeforeDot := key[:dotIndex]
+		key = key[dotIndex+1:]
+
+		if FirstCharUpper(keyBeforeDot) != keyBeforeDot {
+			panic(fmt.Sprintf("Cannot set a non-exported field=%v in struct.", keyBeforeDot))
+		}
+
+		var nestedObj reflect.Value
+		nestedObj, exists := NestedStructIndex(keyBeforeDot, obj)
+		if !exists {
+			panic(fmt.Sprintf("Cannot set non-existent field=%v in struct=%v.", keyBeforeDot, obj))
+		}
+
+		// nestedObj is a nil ptr to struct
+		if TypeIsPtrToStruct(StructFieldType(keyBeforeDot, obj)) && !nestedObj.Elem().IsValid() {
+			structField, _ := StructIndirect(obj).Type().FieldByName(keyBeforeDot)
+			nestedObj.Set(reflect.Indirect(reflect.New(structField.Type)))
+		}
+		obj = nestedObj
+	}
+
+	SetStructIndex(key, x, obj)
+}
+
 func StructIndex(key string, v reflect.Value) (val reflect.Value, exists bool) {
 
 	if !IsPtrStructOrStruct(v) {
