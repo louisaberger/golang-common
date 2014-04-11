@@ -58,6 +58,10 @@ func IsMap(v reflect.Value) bool {
 	return v.Kind() == reflect.Map
 }
 
+func IsPtr(v reflect.Value) bool {
+	return v.Kind() == reflect.Ptr
+}
+
 func IsPtrToMap(v reflect.Value) bool {
 	switch v.Kind() {
 	case reflect.Ptr:
@@ -74,6 +78,10 @@ func IsPtrToStruct(v reflect.Value) bool {
 		return IsStruct(pointingToObj)
 	}
 	return false
+}
+
+func IsPtrStructOrStruct(v reflect.Value) bool {
+	return IsPtrToStruct(v) || IsStruct(v)
 }
 
 func IsSliceOfString(v reflect.Value) bool {

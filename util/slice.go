@@ -8,11 +8,9 @@ import (
 // @return true if elt is in slice.
 // panics if slice is not of Kind reflect.Slice
 func SliceContains(slice, elt interface{}) bool {
-	if slice == nil {
-		return false
-	}
+
 	v := reflect.ValueOf(slice)
-	if v.Kind() != reflect.Slice {
+	if !IsSlice(v) {
 		panic(fmt.Sprintf("Cannot call SliceContains on a non-slice %#v of kind %#v", slice, v.Kind().String()))
 	}
 	for i := 0; i < v.Len(); i++ {
@@ -26,8 +24,9 @@ func SliceContains(slice, elt interface{}) bool {
 // @return number of instances of 'elt' in 'slice'.
 // panics if slice is not of Kind reflect.Slice
 func SliceCount(slice, elt interface{}) int {
+
 	v := reflect.ValueOf(slice)
-	if v.Kind() != reflect.Slice {
+	if !IsSlice(v) {
 		panic(fmt.Sprintf("Cannot call SliceCount on a non-slice %#v of kind %#v", slice, v.Kind().String()))
 	}
 	counter := 0
@@ -42,6 +41,7 @@ func SliceCount(slice, elt interface{}) int {
 // @return true if s1 and s2 have exactly the same elements, in any order.
 // panics if s1 or s2 are not of Kind reflect.Slice
 func SliceUnorderedEqual(s1, s2 interface{}) bool {
+
 	v1 := reflect.ValueOf(s1)
 	v2 := reflect.ValueOf(s2)
 
@@ -49,10 +49,10 @@ func SliceUnorderedEqual(s1, s2 interface{}) bool {
 		return !v1.IsValid() && !v2.IsValid()
 	}
 
-	if v1.Kind() != reflect.Slice {
+	if !IsSlice(v1) {
 		panic(fmt.Sprintf("Cannot call SliceUnorderedEqual on a non-slice %#v of kind %#v", s1, v1.Kind().String()))
 	}
-	if v2.Kind() != reflect.Slice {
+	if !IsSlice(v2) {
 		panic(fmt.Sprintf("Cannot call SliceUnorderedEqual on a non-slice %#v of kind %#v", s2, v2.Kind().String()))
 	}
 
@@ -73,8 +73,9 @@ func SliceUnorderedEqual(s1, s2 interface{}) bool {
 // @return slice with the element at idx removed.
 // panics if slice is not of Kind reflect.Slice
 func SliceRemove(slice interface{}, idx int) (modSlice interface{}) {
+
 	v := reflect.ValueOf(slice)
-	if v.Kind() != reflect.Slice {
+	if !IsSlice(v) {
 		panic(fmt.Sprintf("Cannot call SliceRemove on a non-slice %#v of kind %#v", slice, v.Kind().String()))
 	}
 
@@ -88,8 +89,9 @@ func SliceRemove(slice interface{}, idx int) (modSlice interface{}) {
 // @return slice with all instances of elt removed.
 // panics if slice is not of Kind reflect.Slice
 func SliceRemoveElt(slice interface{}, elt interface{}) (modSlice interface{}) {
+
 	v := reflect.ValueOf(slice)
-	if v.Kind() != reflect.Slice {
+	if !IsSlice(v) {
 		panic(fmt.Sprintf("Cannot call SliceRemoveElt on a non-slice %#v of kind %#v", slice, v.Kind().String()))
 	}
 

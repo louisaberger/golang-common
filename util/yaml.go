@@ -11,10 +11,7 @@ func ReadYamlFromFile(filename string, result interface{}) error {
 	if err != nil {
 		return err
 	}
-	if err = yaml.Unmarshal(rawFileData, result); err != nil {
-		return err
-	}
-	return nil
+	return yaml.Unmarshal(rawFileData, result)
 }
 
 func WriteYamlToFile(filename string, data interface{}, perm os.FileMode) error {
@@ -22,8 +19,5 @@ func WriteYamlToFile(filename string, data interface{}, perm os.FileMode) error 
 	if err != nil {
 		return err
 	}
-	if err = ioutil.WriteFile(filename, rawData, perm); err != nil {
-		return err
-	}
-	return nil
+	return ioutil.WriteFile(filename, rawData, perm)
 }

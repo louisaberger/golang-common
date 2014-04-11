@@ -8,13 +8,13 @@ import (
 	"os"
 )
 
-func ReadJSONInto(r io.ReadCloser, data interface{}) error {
+func ReadJSONInto(r io.ReadCloser, result interface{}) error {
 	defer r.Close()
 	bytes, err := ioutil.ReadAll(r)
 	if err != nil {
 		return err
 	}
-	return json.Unmarshal(bytes, data)
+	return json.Unmarshal(bytes, result)
 }
 
 func ReadJsonFromFile(filename string, result interface{}) error {
@@ -22,10 +22,7 @@ func ReadJsonFromFile(filename string, result interface{}) error {
 	if err != nil {
 		return err
 	}
-	if err = json.Unmarshal(rawFileData, result); err != nil {
-		return err
-	}
-	return nil
+	return json.Unmarshal(rawFileData, result)
 }
 
 // Writes data to filename as "pretty" JSON.
@@ -42,8 +39,5 @@ func WriteJsonToFile(filename string, data interface{}, perm os.FileMode) error 
 		return err
 	}
 
-	if err = ioutil.WriteFile(filename, buf.Bytes(), perm); err != nil {
-		return err
-	}
-	return nil
+	return ioutil.WriteFile(filename, buf.Bytes(), perm)
 }

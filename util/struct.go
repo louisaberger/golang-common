@@ -8,7 +8,7 @@ import (
 
 func StructIndex(key string, v reflect.Value) (val reflect.Value, exists bool) {
 
-	if !IsPtrToStruct(v) && !IsStruct(v) {
+	if !IsPtrStructOrStruct(v) {
 		panic(fmt.Sprintf("Cannot call StructIndex on a non-struct %#v of kind %#v", v, v.Kind().String()))
 	}
 
@@ -20,16 +20,7 @@ func StructIndex(key string, v reflect.Value) (val reflect.Value, exists bool) {
 		return
 	}
 
-	return structFromPtrOrStruct(v).FieldByName(key), true
-}
-
-func StructFieldExists(key string, v reflect.Value) bool {
-	if !IsPtrToStruct(v) && !IsStruct(v) {
-		panic(fmt.Sprintf("Cannot call StructFieldExists on a non-struct %#v of kind %#v", v, v.Kind().String()))
-	}
-
-	_, ok := structFromPtrOrStruct(v).Type().FieldByName(key)
-	return ok
+	return StructIndirect(v).FieldByName(key), true
 }
 
 func NestedStructIndex(key string, v reflect.Value) (val reflect.Value, exists bool) {
@@ -39,8 +30,8 @@ func NestedStructIndex(key string, v reflect.Value) (val reflect.Value, exists b
 	key = strings.TrimSuffix(key, ".")
 
 	for strings.Index(key, ".") != -1 {
-		if !IsPtrToStruct(obj) && !IsStruct(obj) {
-			panic(fmt.Sprintf("Cannot call NestedStructIndex on a non-struct %#v of kind %#v", v, v.Kind().String()))
+		if !IsPtrStructOrStruct(obj) {
+			panic(fmt.Sprintf("Cannot call NestedStructIndex on a non-struct %#v of kind %#v", obj, obj.Kind().String()))
 		}
 
 		dotIndex := strings.Index(key, ".")
@@ -58,7 +49,7 @@ func NestedStructIndex(key string, v reflect.Value) (val reflect.Value, exists b
 		}
 
 		// nestedObj is a nil ptr to struct
-		if TypeIsPtrToStruct(structFieldType(keyBeforeDot, obj)) && !nestedObj.Elem().IsValid() {
+		if TypeIsPtrToStruct(StructFieldType(keyBeforeDot, obj)) && !nestedObj.Elem().IsValid() {
 			return
 		}
 		obj = nestedObj
@@ -67,21 +58,30 @@ func NestedStructIndex(key string, v reflect.Value) (val reflect.Value, exists b
 	return StructIndex(key, obj)
 }
 
-func structFieldType(key string, v reflect.Value) (t reflect.Type) {
-	if !IsPtrToStruct(v) && !IsStruct(v) {
-		panic(fmt.Sprintf("Cannot call structFieldType on a non-struct %#v of kind %#v", v, v.Kind().String()))
+func StructFieldExists(key string, v reflect.Value) bool {
+	if !IsPtrStructOrStruct(v) {
+		panic(fmt.Sprintf("Cannot call StructFieldExists on a non-struct %#v of kind %#v", v, v.Kind().String()))
 	}
 
-	structField, ok := structFromPtrOrStruct(v).Type().FieldByName(key)
+	_, ok := StructIndirect(v).Type().FieldByName(key)
+	return ok
+}
+
+func StructFieldType(key string, v reflect.Value) (t reflect.Type) {
+	if !IsPtrStructOrStruct(v) {
+		panic(fmt.Sprintf("Cannot call StructFieldType on a non-struct %#v of kind %#v", v, v.Kind().String()))
+	}
+
+	structField, ok := StructIndirect(v).Type().FieldByName(key)
 	if !ok {
 		panic(fmt.Sprintf("Key=%v is not a field in struct=%v", key, v))
 	}
 	return structField.Type
 }
 
-func structFromPtrOrStruct(v reflect.Value) (strct reflect.Value) {
-	if !IsPtrToStruct(v) && !IsStruct(v) {
-		panic(fmt.Sprintf("Cannot call structFromPtrOrStruct on a non-struct %#v of kind %#v", v, v.Kind().String()))
+func StructIndirect(v reflect.Value) (strct reflect.Value) {
+	if !IsPtrStructOrStruct(v) {
+		panic(fmt.Sprintf("Cannot call StructIndirect on a non-struct %#v of kind %#v", v, v.Kind().String()))
 	}
 
 	switch {
