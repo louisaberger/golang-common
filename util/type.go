@@ -4,6 +4,40 @@ import (
 	"reflect"
 )
 
+func TypeIsStruct(t reflect.Type) bool {
+	return t.Kind() == reflect.Struct
+}
+
+func TypeIsFunc(t reflect.Type) bool {
+	return t.Kind() == reflect.Func
+}
+
+func TypeIsSlice(t reflect.Type) bool {
+	return t.Kind() == reflect.Slice
+}
+
+func TypeIsMap(t reflect.Type) bool {
+	return t.Kind() == reflect.Map
+}
+
+func TypeIsPtrToMap(t reflect.Type) bool {
+	switch t.Kind() {
+	case reflect.Ptr:
+		pointingToType := t.Elem()
+		return TypeIsMap(pointingToType)
+	}
+	return false
+}
+
+func TypeIsPtrToStruct(t reflect.Type) bool {
+	switch t.Kind() {
+	case reflect.Ptr:
+		pointingToType := t.Elem()
+		return TypeIsStruct(pointingToType)
+	}
+	return false
+}
+
 func IsZero(v reflect.Value) bool {
 	return v.Kind() == reflect.Invalid
 }
